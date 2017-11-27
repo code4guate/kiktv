@@ -1,6 +1,9 @@
 //The first step to using Gulp is to require it in the gulpfile.
 //The require statement tells Node to look into the node_modules folder for a package named gulp. 
 //Once the package is found, we assign its contents to the variable gulp.
+
+var pathToHost =  'localhost/kiktv';
+
 // ---  Require Gulp Libraries  ------
 var fs        = require('fs');
 var gulp      = require('gulp');
@@ -46,9 +49,10 @@ const AUTOPREFIXER_BROWSERS = [
 
 gulp.task('browserSync', function(){
   browserSync.init({
-        server: {
-            baseDir: "app"
-        }
+        proxy: pathToHost,
+        injectChanges: true,
+        // Use a specific port.
+        port: 8000,
     });
 });
 
@@ -91,6 +95,7 @@ gulp.task('vendorfonts', function(){
 gulp.task('watch', ['browserSync', 'sass'], function(){
     gulp.watch('app/scss/**/*.scss', ['sass']);
     gulp.watch('app/**/*.html', [browserSync.reload]);
+    gulp.watch('app/**/*.php', [browserSync.reload]);
     gulp.watch('app/**/*.js', [browserSync.reload]);
 });
 
@@ -113,15 +118,15 @@ gulp.task('buildfonts', function(){
 });
 
 gulp.task('useref', function(){
-  return gulp.src('app/*.html')
+  return gulp.src('app/*.php')
    .pipe(useref())
    .pipe(gulpIf('*.js', uglify()))
    .pipe(gulpIf('*.css', clean()))
    .pipe(gulp.dest('../build'));
 });
 
-gulp.task('buildhtml', function(){
-  return gulp.src('../build/*.html')
+gulp.task('buildphp', function(){
+  return gulp.src('../build/*.php')
     .pipe(htmlmin({collapseWhitespace: true}))
     .pipe(gulp.dest('../build/'));
 });
@@ -132,5 +137,5 @@ gulp.task('buildhtml', function(){
 //         .pipe(gulp.dest('../build'))
 // });
 
-gulp.task('build', gulpSequence('useref', 'buildhtml', ['buildimg', 'buildfonts']));
+gulp.task('build', gulpSequence('useref', 'buildphp', ['buildimg', 'buildfonts']));
 
